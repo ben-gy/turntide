@@ -1,0 +1,25 @@
+{
+  "name": "turntide",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Draughts where a jump never kills — leap an enemy and it flips to your colour, so all 24 stones stay on the board.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@ben-gy/game-engine": "github:ben-gy/gh-game-engine#v1.1.0",
+    "trystero": "^0.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "jsdom": "^25.0.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0",
+    "vitest": "^2.0.0"
+  }
+}

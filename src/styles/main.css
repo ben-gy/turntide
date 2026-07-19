@@ -1,0 +1,869 @@
+@import '@ben-gy/game-engine/mobile.css';
+
+/*
+ * main.css — the shell.
+ *
+ * COLOURS ARE NOT DEFINED HERE. Every `--tt-*` custom property is written onto
+ * :root at boot by ui.ts from PALETTE, which is the file tests/contrast.test.ts
+ * pins. Those values have already moved once because a measured colour failed
+ * the >=3:1 bar; copying them into a stylesheet would make the next fix a
+ * two-place edit and therefore, eventually, a drift.
+ */
+
+/*
+ * MANDATORY. Safari's UA rule for [hidden] is not !important, so any element
+ * with `display: flex` from a class stays visible when hidden — an overlay that
+ * looks dismissed while still eating every tap on the board underneath it.
+ */
+[hidden] {
+  display: none !important;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--tt-ground, #0e1720);
+  color: var(--tt-text, #e8eef4);
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+body {
+  min-height: 100dvh;
+}
+
+/* Sticky footer. */
+#app {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1 0 auto;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: calc(10px + env(safe-area-inset-top)) calc(10px + env(safe-area-inset-right))
+    10px calc(10px + env(safe-area-inset-left));
+}
+
+.site-footer {
+  flex-shrink: 0;
+  padding: 14px 12px calc(14px + env(safe-area-inset-bottom));
+  text-align: center;
+  font-size: 13px;
+  color: var(--tt-text-dim);
+}
+
+.site-footer a {
+  color: var(--tt-hint);
+}
+
+/* Mid-round the footer would sit under the board and steal taps. */
+body.playing .site-footer {
+  display: none;
+}
+
+/* ── type & controls ─────────────────────────────────────────────────────── */
+
+h1,
+h2 {
+  margin: 0 0 8px;
+  line-height: 1.15;
+}
+
+p {
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+
+.dim {
+  color: var(--tt-text-dim);
+}
+
+.good {
+  color: var(--tt-good);
+}
+
+.bad {
+  color: var(--tt-danger);
+}
+
+.btn,
+.lobby-btn {
+  appearance: none;
+  border: 1px solid var(--tt-panel-edge);
+  background: var(--tt-panel);
+  color: var(--tt-text);
+  border-radius: 12px;
+  padding: 12px 18px;
+  min-height: 44px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.btn.primary,
+.lobby-btn.primary {
+  background: var(--tt-teal);
+  border-color: var(--tt-teal);
+  color: var(--tt-ground);
+}
+
+.btn.ghost,
+.lobby-btn.ghost {
+  background: transparent;
+}
+
+.btn:disabled,
+.lobby-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.row-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+/* ── menu ────────────────────────────────────────────────────────────────── */
+
+.brand {
+  text-align: center;
+  margin: 18px 0 20px;
+}
+
+.brand-title {
+  font-size: clamp(34px, 12vw, 52px);
+  letter-spacing: -0.02em;
+  color: var(--tt-teal);
+}
+
+.brand-sub {
+  color: var(--tt-text-dim);
+  max-width: 34ch;
+  margin: 0 auto;
+}
+
+.menu-actions {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.menu-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.panel {
+  background: var(--tt-panel);
+  border: 1px solid var(--tt-panel-edge);
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.panel-title {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--tt-text-dim);
+  margin-bottom: 10px;
+}
+
+.picks {
+  display: grid;
+  gap: 8px;
+}
+
+.picks.row {
+  grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
+}
+
+.pick {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--tt-panel-edge);
+  background: transparent;
+  color: var(--tt-text);
+  border-radius: 12px;
+  padding: 10px 12px;
+  min-height: 44px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.pick.on {
+  border-color: var(--tt-teal);
+  box-shadow: inset 0 0 0 1px var(--tt-teal);
+}
+
+.pick-name {
+  display: block;
+  font-weight: 700;
+}
+
+.pick-blurb {
+  display: block;
+  font-size: 13px;
+  color: var(--tt-text-dim);
+  margin-top: 2px;
+}
+
+.sheet {
+  background: var(--tt-panel);
+  border: 1px solid var(--tt-panel-edge);
+  border-radius: 14px;
+  padding: 16px;
+  margin: 12px 0;
+}
+
+.sheet-title {
+  font-size: 22px;
+}
+
+/* ── HUD ─────────────────────────────────────────────────────────────────── */
+
+.hud {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: env(safe-area-inset-top);
+}
+
+.hud-turn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.turn-who {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.turn-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: var(--tt-text-dim);
+}
+
+.turn-dot.teal {
+  background: var(--tt-teal);
+}
+
+.turn-dot.amber {
+  background: var(--tt-amber);
+}
+
+.hud-clock {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: var(--tt-panel);
+}
+
+.hud-clock.low {
+  color: var(--tt-danger);
+}
+
+.hud-sub {
+  font-size: 13px;
+  margin: 4px 0 8px;
+}
+
+/* ── the board ───────────────────────────────────────────────────────────── */
+
+.tide {
+  margin-bottom: 10px;
+}
+
+.tide-track {
+  position: relative;
+  display: flex;
+  height: 14px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--tt-board-dark);
+}
+
+.tide-fill {
+  height: 100%;
+  transition: width 260ms ease;
+}
+
+.tide-fill.teal {
+  background: var(--tt-teal);
+}
+
+.tide-fill.amber {
+  background: var(--tt-amber);
+}
+
+/* The rout cliffs, marked so you can see one coming rather than discover it. */
+.tide-mark {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--tt-ground);
+  opacity: 0.9;
+}
+
+.tide-nums {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-top: 4px;
+  color: var(--tt-text-dim);
+}
+
+.tide-num.teal b {
+  color: var(--tt-teal);
+}
+
+.tide-num.amber b {
+  color: var(--tt-amber);
+}
+
+.board-frame {
+  width: min(540px, 100%);
+  margin: 0 auto;
+  padding: 6px;
+  background: var(--tt-frame);
+  border-radius: 12px;
+}
+
+/*
+ * Percentage layout throughout: `minmax(0, 1fr)` columns and a square aspect
+ * ratio, so a 10x10 fits at 375px for exactly the same reason an 8x8 does. No
+ * fixed px cell size exists to overflow.
+ */
+.board {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.cells {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--n, 8), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--n, 8), minmax(0, 1fr));
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.cell {
+  position: relative;
+  background: var(--tt-board-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cell.playable {
+  background: var(--tt-board-dark);
+}
+
+.cell.last {
+  background: var(--tt-last-move);
+}
+
+.cell.hint::after {
+  content: '';
+  width: 30%;
+  height: 30%;
+  border-radius: 50%;
+  background: var(--tt-hint);
+}
+
+.cell.sel,
+.cell.head {
+  box-shadow: inset 0 0 0 3px var(--tt-select);
+}
+
+.stones {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.stone {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(100% / var(--n, 8));
+  height: calc(100% / var(--n, 8));
+  transform: translate(
+    calc(var(--c, 0) * 100% + var(--dx, 0px)),
+    calc(var(--r, 0) * 100% + var(--dy, 0px))
+  );
+  transition: transform 180ms cubic-bezier(0.2, 0.8, 0.3, 1);
+  will-change: transform;
+}
+
+/* Dragging follows the finger with no easing; releasing restores the transition,
+ * which is what gives an illegal drop its ~180ms snap home. */
+.stone.dragging {
+  transition: none;
+  z-index: 3;
+}
+
+.stone.is-sel .turner {
+  box-shadow: 0 0 0 3px var(--tt-select);
+  border-radius: 50%;
+}
+
+.turner {
+  position: absolute;
+  inset: 11%;
+  transform-style: preserve-3d;
+}
+
+.face {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.face.back {
+  transform: rotateY(180deg);
+}
+
+.stone.teal .face.front,
+.face.back.teal {
+  background: var(--tt-teal);
+}
+
+.stone.amber .face.front,
+.face.back.amber {
+  background: var(--tt-amber);
+}
+
+/* Kings carry an ENGRAVED RING — a shape cue, so the crown is never signalled
+ * by colour alone. */
+.ring {
+  position: absolute;
+  inset: 22%;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  display: none;
+}
+
+.stone.king .ring {
+  display: block;
+}
+
+.stone.king.teal .ring {
+  border-color: var(--tt-teal-ring);
+}
+
+.stone.king.amber .ring {
+  border-color: var(--tt-amber-ring);
+}
+
+/* Cooling: a rim PLUS a notch. The rim colour is dark because a rim has to clear
+ * 3:1 against both stone colours and no light value can, so the notch carries
+ * the shape half of the cue. */
+.stone.cool .face.front {
+  box-shadow: inset 0 0 0 3px var(--tt-frost);
+}
+
+.stone.cool .face.front::after {
+  content: '';
+  position: absolute;
+  top: 4%;
+  left: 50%;
+  width: 14%;
+  height: 26%;
+  transform: translateX(-50%);
+  border-radius: 0 0 3px 3px;
+  background: var(--tt-frost);
+}
+
+/* THE FLIP. 180 degrees on the stone's own axis, staggered down the chain so a
+ * cascade reads as a wave rolling across the board. */
+@keyframes tt-flip {
+  from {
+    transform: rotateY(180deg);
+  }
+  to {
+    transform: rotateY(0deg);
+  }
+}
+
+.stone.flip .turner {
+  animation: tt-flip 220ms ease-in-out both;
+  animation-delay: var(--flip-delay, 0ms);
+}
+
+@keyframes tt-shake {
+  25% {
+    transform: translateX(-4px);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+  75% {
+    transform: translateX(-2px);
+  }
+}
+
+.board.shake {
+  animation: tt-shake 300ms ease-in-out;
+}
+
+.board-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+  min-height: 44px;
+}
+
+/* ── overlays ────────────────────────────────────────────────────────────── */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(10, 16, 23, 0.86);
+}
+
+.overlay-card {
+  background: var(--tt-panel);
+  border: 1px solid var(--tt-panel-edge);
+  border-radius: 16px;
+  padding: 20px;
+  width: min(360px, 100%);
+  display: grid;
+  gap: 8px;
+  text-align: center;
+}
+
+.countdown {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.game {
+  position: relative;
+}
+
+.cd-num {
+  font-size: clamp(56px, 22vw, 110px);
+  font-weight: 800;
+  color: var(--tt-select);
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+  animation: tt-pop 400ms ease-out;
+}
+
+.cd-go {
+  color: var(--tt-teal);
+}
+
+@keyframes tt-pop {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 40;
+  background: var(--tt-panel);
+  border: 1px solid var(--tt-panel-edge);
+  color: var(--tt-text);
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  max-width: calc(100vw - 32px);
+  text-align: center;
+}
+
+/* ── results ─────────────────────────────────────────────────────────────── */
+
+.results-title {
+  font-size: 28px;
+}
+
+.score {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 14px;
+  display: block;
+  overflow-x: auto;
+}
+
+.score th,
+.score td {
+  padding: 8px 6px;
+  text-align: right;
+  border-bottom: 1px solid var(--tt-panel-edge);
+  white-space: nowrap;
+}
+
+.score th[scope='row'] {
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.score thead th {
+  color: var(--tt-text-dim);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.score tr.win th[scope='row'] {
+  color: var(--tt-good);
+}
+
+/* ── lobby & room entry ──────────────────────────────────────────────────── */
+
+.lobby,
+.room-entry {
+  display: grid;
+  gap: 12px;
+  background: var(--tt-panel);
+  border: 1px solid var(--tt-panel-edge);
+  border-radius: 14px;
+  padding: 16px;
+  margin: 12px 0;
+}
+
+.lobby-title,
+.re-title {
+  font-size: 20px;
+}
+
+.lobby-code {
+  color: var(--tt-teal);
+  letter-spacing: 0.12em;
+}
+
+.lobby-sub,
+.re-sub,
+.lobby-wait {
+  color: var(--tt-text-dim);
+  font-size: 14px;
+  margin: 0;
+}
+
+.lobby-invite {
+  display: flex;
+  gap: 8px;
+}
+
+.lobby-link,
+.re-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  background: var(--tt-ground);
+  border: 1px solid var(--tt-panel-edge);
+  border-radius: 10px;
+  color: var(--tt-text);
+  padding: 10px 12px;
+  min-height: 44px;
+  font: inherit;
+}
+
+.re-input {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  text-align: center;
+}
+
+.re-join {
+  display: flex;
+  gap: 8px;
+}
+
+.re-divider {
+  text-align: center;
+  color: var(--tt-text-dim);
+  font-size: 13px;
+}
+
+.re-error {
+  color: var(--tt-danger);
+  font-size: 14px;
+  margin: 0;
+  min-height: 1.2em;
+}
+
+.lobby-players {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.lobby-player {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--tt-ground);
+}
+
+.lobby-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--tt-text-dim);
+}
+
+.lobby-dot.ready {
+  background: var(--tt-good);
+}
+
+.lobby-badge {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--tt-panel-edge);
+  color: var(--tt-text-dim);
+}
+
+.lobby-badge.ok {
+  color: var(--tt-good);
+  border-color: var(--tt-good);
+}
+
+.lobby-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.lobby-searching {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--tt-text-dim);
+  font-size: 14px;
+}
+
+.lobby-flash {
+  min-height: 1.2em;
+  font-size: 14px;
+  color: var(--tt-good);
+  opacity: 0;
+  transition: opacity 200ms;
+}
+
+.lobby-flash.show {
+  opacity: 1;
+}
+
+/* An animated spinner, never static text: a still "connecting…" is
+ * indistinguishable from a hang. */
+.spinner {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  border: 2px solid var(--tt-panel-edge);
+  border-top-color: var(--tt-teal);
+  animation: tt-spin 800ms linear infinite;
+}
+
+.spinner.sm {
+  width: 13px;
+  height: 13px;
+  border-width: 2px;
+}
+
+@keyframes tt-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── reduced motion ──────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  /* No shake, and the flip degrades to a short cross-fade rather than vanishing
+   * entirely — the conversion still has to be legible. */
+  .board.shake {
+    animation: none;
+  }
+
+  @keyframes tt-fade {
+    from {
+      opacity: 0.25;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .stone.flip .turner {
+    animation: tt-fade 120ms linear both;
+  }
+
+  .stone {
+    transition-duration: 120ms;
+  }
+
+  .cd-num {
+    animation: none;
+  }
+
+  .spinner {
+    animation-duration: 2s;
+  }
+}
