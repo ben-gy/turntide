@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Draughts where a jump never kills — leap an enemy and it flips to your colour, so all 24 stones stay on the board.",
+  "license": "AGPL-3.0-or-later",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
