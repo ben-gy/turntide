@@ -49,33 +49,6 @@ import {
 
 const SLUG = 'turntide';
 
-/**
- * Signaling relays — a deliberate game-side override of the engine's
- * `DEFAULT_RELAYS`, and it should be temporary.
- *
- * Measured during this build's two-peer smoke test: of the engine's six curated
- * relays, THREE were impaired at once. `wss://nostr.wine` answers reads but
- * REJECTS writes ("restricted: sign up ... to write events"), `wss://relay.damus.io`
- * was rate-limiting announces ("you are noting too much"), and
- * `wss://relay.nostr.band` did not answer at all. Peers announce over these, so a
- * write-restricted relay is not a degraded relay — it is a dead one that still
- * looks alive to a connection check. With half the list dead the two peers landed
- * on non-overlapping working subsets and never discovered each other.
- *
- * These are all write-open at time of writing. This is the wrapper the engine's
- * own guidance asks for when the package cannot express something (see its
- * DEPRECATED.md note in the factory repo); the real fix belongs in the engine's
- * shared list, and is logged in EXPANSION_IDEAS.md under "Engine" so one release
- * can fix the whole fleet instead of each game carrying its own list.
- */
-const RELAYS = [
-  'wss://nos.lol',
-  'wss://relay.primal.net',
-  'wss://relay.snort.social',
-  'wss://offchain.pub',
-  'wss://nostr.mom',
-  'wss://nostr-pub.wellorder.net',
-];
 /** Per-turn budget in a live room. Long, because this is a thinking game — but
  *  finite, because a room that hangs on an absent player is worse than a rushed
  *  move. The host plays a legal move for a seat that runs out. */
@@ -392,7 +365,6 @@ function joinRoom(code: string, created: boolean): void {
         // ONLY the peer that minted the code claims the room. Anyone arriving by
         // link or typed code must defer, or two peers race to host.
         claimHost: created,
-        relayUrls: RELAYS,
       },
       {
         onPeerLeave: (id) => {
