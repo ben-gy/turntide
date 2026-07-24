@@ -35,7 +35,6 @@ import './styles/main.css';
 import { aiMove, STRENGTHS, STRENGTH_IDS, strengthOf, type Strength } from './ai';
 import { createBoard, type BoardView } from './board';
 import { createCountdown, type Countdown } from './countdown';
-import { mountFeedback, openFeedback } from './feedback';
 import { Game, seatsFor, type PlayerInfo } from './game';
 import { MODES, MODE_IDS, DEFAULT_MODE, modeOf, type ModeId } from './modes';
 import { createSession, type Session } from './session';
@@ -173,7 +172,6 @@ async function boot(): Promise<void> {
   } catch {
     /* non-fatal */
   }
-  mountFeedback();
 
   window.addEventListener('resize', () => board?.resize());
   window.addEventListener('pagehide', () => {
@@ -302,7 +300,7 @@ function showAbout(): void {
   screen.querySelector('[data-act="back"]')?.addEventListener('click', () => showMenu());
   screen.querySelector('[data-act="feedback"]')?.addEventListener('click', () => {
     try {
-      openFeedback();
+      (window as any).feedback?.open();
     } catch {
       toast('Feedback is unavailable right now.');
     }
@@ -749,7 +747,7 @@ function showResults(): void {
   screen.querySelector('[data-act="share"]')?.addEventListener('click', () => void share(summary.players.find((p) => p.side === localSide)?.bestChain ?? 0, headline));
   screen.querySelector('[data-act="feedback"]')?.addEventListener('click', () => {
     try {
-      openFeedback();
+      (window as any).feedback?.open();
     } catch {
       toast('Feedback is unavailable right now.');
     }
